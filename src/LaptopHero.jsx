@@ -1,58 +1,100 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { portfolio } from './content.js'
 import './laptop-hero.css'
 
 export default function LaptopHero() {
   const stage = useRef(null)
-  const hasOpened = useRef(false)
   const portfolioButton = useRef(null)
   const studioButton = useRef(null)
+  const nextInput = useRef(0)
+  const gesture = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
   const [selected, setSelected] = useState(0)
   const { name, role, portrait, email, location, projects } = portfolio
   const project = projects[selected]
+  const alternate = project.gallery.find(({ src }) => src !== project.cover.src)
 
   function openWork() {
-    hasOpened.current = true
+    if (isOpen) return
+    nextInput.current = performance.now() + 1050
+    setSelected(0)
     setIsOpen(true)
   }
 
   function showStudio() {
     setIsOpen(false)
     studioButton.current?.focus({ preventScroll: true })
-    window.scrollTo({ top: 0, behavior: 'instant' })
+    nextInput.current = performance.now() + 850
   }
 
   function moveProject(step) {
+    if (step < 0 && selected === 0) {
+      showStudio()
+      return
+    }
     setSelected((index) => (index + step + projects.length) % projects.length)
   }
 
-  useEffect(() => {
-    function onScroll() {
-      if (hasOpened.current || (window.location.hash && window.location.hash !== '#top') || !stage.current ||
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-      const top = stage.current.getBoundingClientRect().top
-      if (top < -42 && top > -window.innerHeight * .48) openWork()
+  function navigate(step) {
+    if (!isOpen) {
+      if (step > 0) openWork()
+      return
     }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    moveProject(step)
+  }
+
+  const wheelNavigate = useEffectEvent((event) => {
+    if (event.ctrlKey || event.metaKey) return
+    const distance = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
+    if (Math.abs(distance) < (event.deltaMode ? 1 : 18)) return
+    event.preventDefault()
+    const now = performance.now()
+    if (now < nextInput.current) return
+    nextInput.current = now + 720
+    navigate(Math.sign(distance))
+  })
+
+  useEffect(() => {
+    const element = stage.current
+    const onWheel = (event) => wheelNavigate(event)
+    element.addEventListener('wheel', onWheel, { passive: false })
+    return () => element.removeEventListener('wheel', onWheel)
   }, [])
 
   function handleKeys(event) {
     if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
     if (event.key === 'Escape' && isOpen) {
       showStudio()
-    } else if (isOpen && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+      return
+    }
+    if (event.repeat || (event.key === ' ' && event.target.closest('button, a'))) return
+    const next = ['ArrowDown', 'PageDown', 'ArrowRight', ' '].includes(event.key)
+    const previous = ['ArrowUp', 'PageUp', 'ArrowLeft'].includes(event.key)
+    if (next || previous) {
       event.preventDefault()
-      moveProject(event.key === 'ArrowRight' ? 1 : -1)
-    } else if (!isOpen && event.target === stage.current && ['ArrowDown', 'PageDown', ' '].includes(event.key)) {
-      event.preventDefault()
-      openWork()
+      navigate(next ? 1 : -1)
+    }
+  }
+
+  function finishSwipe(event) {
+    const start = gesture.current
+    gesture.current = null
+    if (!start || event.touches.length !== 0) return
+    const end = event.changedTouches[0]
+    const horizontal = start.clientX - end.clientX
+    const vertical = start.clientY - end.clientY
+    const distance = Math.abs(horizontal) > Math.abs(vertical) ? horizontal : vertical
+    if (Math.abs(distance) >= 40 && performance.now() >= nextInput.current) {
+      nextInput.current = performance.now() + 650
+      navigate(Math.sign(distance))
     }
   }
 
   return (
-    <section className="laptop-hero" id="top" ref={stage} tabIndex={-1} onKeyDown={handleKeys} aria-label={`${name} portfolio`}>
+    <section className="laptop-hero" id="top" ref={stage} tabIndex={-1} onKeyDown={handleKeys}
+      onTouchStart={({ touches }) => { gesture.current = touches.length === 1 ? touches[0] : null }}
+      onTouchCancel={() => { gesture.current = null }} onTouchEnd={finishSwipe}
+      aria-label={`${name} portfolio`}>
       <div className={`studio-stage${isOpen ? ' is-dive' : ''}`}>
         <header className="studio-nav">
           <button ref={studioButton} type="button" className="studio-tag" onClick={showStudio} aria-pressed={!isOpen}>My studio</button>
@@ -79,7 +121,11 @@ export default function LaptopHero() {
           aria-label={isOpen ? 'Show next project' : 'Zoom into the laptop and explore portfolio'}>
           <span className="studio-lid">
             <span className="studio-screen">
-              <img key={project.slug} src={project.cover.src} alt="" />
+              <span className="studio-screen-reel" key={project.slug}>
+                <img src={project.cover.src} alt="" />
+                {isOpen && alternate && <img className="studio-screen-alternate" src={alternate.src} alt="" />}
+              </span>
+              {isOpen && <span className="studio-screen-flash" key={`flash-${project.slug}`} aria-hidden="true" />}
             </span>
           </span>
           <span className="studio-base" aria-hidden="true" />

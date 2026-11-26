@@ -40,29 +40,6 @@ function SectionLabel({ number, children }) {
   )
 }
 
-function Approach() {
-  const words = data.approach.split(' ')
-
-  return (
-    <section className="approach" id="approach" tabIndex={-1}>
-      <div className="approach-sticky">
-        <SectionLabel number="★">Approach</SectionLabel>
-        <p className="approach-copy">
-          <span className="visually-hidden">{data.approach}</span>
-          {words.map((word, index) => (
-            <span className="approach-word" aria-hidden="true" key={index} style={{
-              '--word-start': `${index / words.length * 94}%`,
-              '--word-end': `${index / words.length * 94 + 6}%`,
-            }}>{word}{' '}</span>
-          ))}
-        </p>
-        <div className="orbit orbit-one" />
-        <div className="orbit orbit-two" />
-      </div>
-    </section>
-  )
-}
-
 function About() {
   return (
     <section className="section about" id="about" tabIndex={-1}>
@@ -70,6 +47,7 @@ function About() {
       <div className="about-grid">
         <Reveal><h2>{data.about.title}</h2></Reveal>
         <Reveal className="about-copy" stagger>
+          <p>{data.approach}</p>
           {data.about.copy.map((copy) => <p key={copy}>{copy}</p>)}
           <div className="principles">{data.about.principles.map((item) => <span key={item}>{item}</span>)}</div>
         </Reveal>
@@ -188,9 +166,8 @@ function Contact() {
 
 export default function App() {
   const [hash, setHash] = useState(() => window.location.hash)
-  const mainRef = useRef(null)
   const isProject = hash.startsWith('#/work/')
-  const wasProject = useRef(isProject)
+  const isStudio = !hash || hash === '#top'
   const project = isProject ? data.projects.find(({ slug }) => hash === `#/work/${slug}`) : null
 
   useEffect(() => {
@@ -202,21 +179,22 @@ export default function App() {
   }, [])
 
   useLayoutEffect(() => {
-    const returningFromGallery = wasProject.current && !isProject
-    wasProject.current = isProject
     if (isProject) return
-    const target = hash ? document.getElementById(hash.slice(1)) : mainRef.current
+    const target = document.getElementById(isStudio ? 'top' : hash.slice(1))
     if (!target) return
     target.focus({ preventScroll: true })
-    if (hash) target.scrollIntoView({ behavior: returningFromGallery ? 'instant' : 'auto' })
-  }, [hash, isProject])
+    if (isStudio) window.scrollTo({ top: 0, behavior: 'instant' })
+    else target.scrollIntoView({ behavior: 'instant' })
+  }, [hash, isProject, isStudio])
 
   if (isProject) return <ProjectPage key={hash} project={project} />
+  if (isStudio) return <main className="studio-home"><LaptopHero /></main>
 
   return (
-    <main ref={mainRef} tabIndex={-1}>
-      <LaptopHero />
-      <Approach />
+    <main className="studio-archive-page">
+      <nav className="section archive-nav" aria-label="Portfolio archive">
+        <a href="#top">← Back to studio</a><a href="#work">Works</a><a href="#about">About</a><a href="#services">Services</a><a href="#contact">Contact</a>
+      </nav>
       <About />
       <Services />
       <Work />
