@@ -319,16 +319,6 @@ html:has(.studio-home), body:has(.studio-home) { overflow: hidden; overscroll-be
 }
 .studio-hint span { font-size: 16px; color: var(--accent); }
 .is-dive .studio-hint { visibility: hidden; }
-.archive-nav { display: flex; flex-wrap: wrap; gap: 10px; padding-block: 16px; }
-.archive-nav a {
-  padding: 10px 14px;
-  border-radius: 2px;
-  background: var(--paper);
-  color: var(--ink);
-  font-weight: 700;
-  font-size: 13px;
-}
-.archive-nav a:first-child { background: var(--accent); }
 
 @media (max-width: 820px) {
   .studio-nav { grid-template-columns: 1fr 1fr; top: 16px; row-gap: 9px; }
