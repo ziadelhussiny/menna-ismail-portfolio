@@ -3,14 +3,19 @@ import { portfolio as data } from './content.js'
 
 const Arrow = () => <span aria-hidden="true">↗</span>
 
-function Reveal({ children, className = '' }) {
+function Reveal({ as: Element = 'div', children, className = '', stagger = false }) {
   const ref = useRef(null)
 
   useEffect(() => {
     const node = ref.current
-    if (!node) return
+    if (!node || !('IntersectionObserver' in window)) return
+    node.classList.add('is-watching')
     const observer = new IntersectionObserver(
-      ([entry]) => entry.isIntersecting && node.classList.add('is-visible'),
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        node.classList.add('is-visible')
+        observer.disconnect()
+      },
       { threshold: 0.12 },
     )
     observer.observe(node)
@@ -18,19 +23,19 @@ function Reveal({ children, className = '' }) {
   }, [])
 
   return (
-    <div ref={ref} className={`reveal ${className}`}>
+    <Element ref={ref} className={`reveal${stagger ? ' reveal-stagger' : ''} ${className}`}>
       {children}
-    </div>
+    </Element>
   )
 }
 
 function SectionLabel({ number, children }) {
   return (
-    <div className="section-label">
+    <Reveal className="section-label" stagger>
       <span>{number}</span>
       <i />
       <p>{children}</p>
-    </div>
+    </Reveal>
   )
 }
 
@@ -128,12 +133,12 @@ function About() {
       <SectionLabel number="01">About</SectionLabel>
       <div className="about-grid">
         <Reveal><h2>{data.about.title}</h2></Reveal>
-        <Reveal className="about-copy">
+        <Reveal className="about-copy" stagger>
           {data.about.copy.map((copy) => <p key={copy}>{copy}</p>)}
           <div className="principles">{data.about.principles.map((item) => <span key={item}>{item}</span>)}</div>
         </Reveal>
       </div>
-      <div className="education"><h3>Education</h3><p>{data.about.education} · {data.about.graduation}</p></div>
+      <Reveal className="education" stagger><h3>Education</h3><p>{data.about.education} · {data.about.graduation}</p></Reveal>
     </section>
   )
 }
@@ -146,9 +151,9 @@ function Services() {
         <Reveal><h2>What I do</h2></Reveal>
         <Reveal><p>{data.tools.join(' · ')}</p></Reveal>
       </div>
-      <div className="service-cloud">
+      <Reveal className="service-cloud" stagger>
         {data.services.map((service, index) => <span key={service} className={index % 3 === 0 ? 'is-solid' : ''}>{service}</span>)}
-      </div>
+      </Reveal>
     </section>
   )
 }
@@ -163,11 +168,11 @@ function Work() {
       <div className="project-list">
         {data.projects.map((project) => (
           <article className="project" key={project.title}>
-            <div className="project-meta section">
+            <Reveal className="project-meta section" stagger>
               <span className="project-number">{project.number}</span>
               <div><h3>{project.title}</h3><p>{project.type}</p></div>
               <div className="project-tools"><p>{project.description}</p></div>
-            </div>
+            </Reveal>
             <Reveal>
               <a className="project-visual" href={`#/work/${project.slug}`} aria-label={`View ${project.title}`}>
                 <img src={project.cover.src} alt={project.cover.title} loading="lazy" />
@@ -177,7 +182,7 @@ function Work() {
           </article>
         ))}
       </div>
-      <div className="more-work"><p>Have a project in mind?</p><a href="#contact">Let’s talk <Arrow /></a></div>
+      <Reveal className="more-work" stagger><p>Have a project in mind?</p><a href="#contact">Let’s talk <Arrow /></a></Reveal>
     </section>
   )
 }
@@ -201,10 +206,10 @@ function ProjectPage({ project }) {
             <p>{project.description}</p>
             <div className="case-gallery">
               {project.gallery.map(({ src, title }, index) => (
-                <figure key={src}>
+                <Reveal as="figure" className={index === 0 ? 'case-lead' : 'case-frame'} key={src} stagger={index !== 0}>
                   <img src={src} alt={`Design work for ${title}`} loading={index === 0 ? 'eager' : 'lazy'} />
                   <figcaption>{title}</figcaption>
-                </figure>
+                </Reveal>
               ))}
             </div>
             <a className="pill" href="#work">← Back to work</a>
@@ -221,16 +226,25 @@ function Contact() {
       <section className="section contact" id="contact" tabIndex={-1}>
         <SectionLabel number="04">Contact</SectionLabel>
         <Reveal><h2>Have something <em>in mind?</em></h2></Reveal>
-        <a className="contact-email" href={`mailto:${data.email}`}>{data.email}<Arrow /></a>
-        <a className="contact-phone" href={`tel:${data.phone}`}>{data.phoneLabel}</a>
+        <Reveal className="contact-links" stagger>
+          <a className="contact-email" href={`mailto:${data.email}`}>{data.email}<Arrow /></a>
+          <a className="contact-phone" href={`tel:${data.phone}`}>{data.phoneLabel}</a>
+        </Reveal>
       </section>
       <footer>
-        <div className="footer-marquee" aria-hidden="true"><span>Let’s talk</span><span>Let’s talk</span><span>Let’s talk</span></div>
-        <div className="footer-grid section">
+        <div className="footer-cta">
+          <Reveal className="section" stagger>
+            <a className="footer-cta-link" href={`mailto:${data.email}`}>
+              <span>Let’s talk</span>
+              <span className="footer-cta-icon"><Arrow /></span>
+            </a>
+          </Reveal>
+        </div>
+        <Reveal className="footer-grid section" stagger>
           <div><a className="logo" href="#top">{data.name}</a><p>{data.role}</p></div>
           <p>{data.location}</p>
-        </div>
-        <div className="footer-bottom section"><span>© 2026 {data.name}</span><a href="#top">Back to top ↑</a></div>
+        </Reveal>
+        <Reveal className="footer-bottom section" stagger><span>© 2026 {data.name}</span><a href="#top">Back to top ↑</a></Reveal>
       </footer>
     </>
   )
