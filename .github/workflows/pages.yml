@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.first-deployment.outputs.page_url || steps.retry-deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
@@ -47,4 +47,11 @@ jobs:
           echo "The Pages artifact did not become available."
           exit 1
       - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
-        id: deployment
+        id: first-deployment
+        continue-on-error: true
+      - name: Wait before retrying Pages deployment
+        if: steps.first-deployment.outcome == 'failure'
+        run: sleep 12
+      - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
+        id: retry-deployment
+        if: steps.first-deployment.outcome == 'failure'
