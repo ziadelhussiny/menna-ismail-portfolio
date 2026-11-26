@@ -190,8 +190,7 @@ function Contact() {
 
 export default function App() {
   const [hash, setHash] = useState(() => window.location.hash)
-  const legacyGroup = { '#/work/social-media': 'social-media', '#/work/logofolio': 'branding' }[hash]
-  const group = projectGroups.find(({ id }) => hash === `#/categories/${id}` || id === legacyGroup)
+  const group = projectGroups.find(({ id }) => hash === `#/categories/${id}`)
   const isProject = hash.startsWith('#/work/') && !group
   const isStudio = !hash || hash === '#top'
   const project = isProject ? projects.find(({ slug }) => hash === `#/work/${slug}`) : null

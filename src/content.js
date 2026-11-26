@@ -30,6 +30,16 @@ export const portfolio = {
 }
 
 const number = (value) => String(value).padStart(2, '0')
+const archivedArtwork = (page, title) => ({ src: publicAsset(`work/page-${page}.webp`), title })
+
+function archivedProject(category, project, images) {
+  return {
+    ...project,
+    category,
+    collections: [{ title: 'Project gallery', images }],
+    imageCount: images.length,
+  }
+}
 
 function collection(directory, count, title, label) {
   return {
@@ -70,6 +80,20 @@ export const projectGroups = [
       project('branding', 'elixir', 'Elixir', 22, 'A visual identity presentation for Elixir.'),
       project('branding', 'doorz', 'Doorz', 50, 'A brand identity presentation for Doorz.'),
       project('branding', 'sakhr', 'Sakhr', 10, 'A visual identity presentation for Sakhr.'),
+      archivedProject('branding', {
+        slug: 'logofolio',
+        title: 'Logofolio',
+        type: 'Logos & visual identity',
+        description: 'Six identities shown across logos, print materials, packaging, signage and digital applications.',
+        cover: archivedArtwork(23, 'Identity with a butterfly mark'),
+      }, [
+        archivedArtwork(22, 'Dental brand identity'),
+        archivedArtwork(23, 'Identity with a butterfly mark'),
+        archivedArtwork(24, 'Geometric brand identity'),
+        archivedArtwork(25, 'Burgerica visual identity'),
+        archivedArtwork(26, 'Arabic brand identity'),
+        archivedArtwork(27, 'Sakhr industrial identity'),
+      ]),
     ],
   },
   {
@@ -86,6 +110,40 @@ export const projectGroups = [
       ]),
       project('social-media', 'topping-pizza', 'Topping Pizza', 3, 'A set of social designs for Topping Pizza.'),
       project('social-media', 'west-wood', 'West Wood', 10, 'A set of social designs for West Wood.'),
+      archivedProject('social-media', {
+        slug: 'social-media',
+        title: 'Social Media Visuals',
+        type: 'Client work · Egypt & Saudi Arabia',
+        description: 'Social designs for healthcare, hospitality, food, automotive and other businesses in Egypt and Saudi Arabia.',
+        cover: archivedArtwork(14, 'Brisket & Oriental'),
+      }, [
+        archivedArtwork(5, 'Dr. Fares Aldaghri · Saudi Arabia'),
+        archivedArtwork(6, 'Juva · Saudi Arabia'),
+        archivedArtwork(7, 'Athar · Egypt and Hawraa Alsaif · Saudi Arabia'),
+        archivedArtwork(8, 'Dr. Khaled Sunbol · Saudi Arabia'),
+        archivedArtwork(9, 'Dr. Mohamed Shoeib · Saudi Arabia'),
+        archivedArtwork(10, 'Qimat Alteb and Tahaluf Alashiqqa · Saudi Arabia'),
+        archivedArtwork(11, 'V Care · Saudi Arabia'),
+        archivedArtwork(12, 'Marketing campaign · Saudi Arabia'),
+        archivedArtwork(13, 'LB Wings and Zakham · Saudi Arabia'),
+        archivedArtwork(14, 'Brisket & Oriental · Egypt'),
+        archivedArtwork(15, 'Servqual · Egypt'),
+        archivedArtwork(16, 'Zadna Factory · Egypt'),
+      ]),
+      archivedProject('social-media', {
+        slug: 'saudi-national-day',
+        title: 'Saudi National Day',
+        type: 'Campaign visuals',
+        description: 'A collection of four widescreen visuals created for Saudi National Day.',
+        cover: archivedArtwork(18, 'Saudi National Day designs'),
+      }, [archivedArtwork(18, 'Saudi National Day designs')]),
+      archivedProject('social-media', {
+        slug: 'saudi-founding-day',
+        title: 'Saudi Founding Day',
+        type: 'Campaign visuals',
+        description: 'Six widescreen campaign visuals for Saudi Founding Day.',
+        cover: archivedArtwork(20, 'Saudi Founding Day designs'),
+      }, [archivedArtwork(20, 'Saudi Founding Day designs')]),
     ],
   },
   {
