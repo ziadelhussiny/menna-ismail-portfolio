@@ -167,3 +167,28 @@ export const projectGroups = [
 }))
 
 export const projects = projectGroups.flatMap((group) => group.projects)
+
+const originalGallerySlugs = ['social-media', 'saudi-national-day', 'saudi-founding-day', 'logofolio']
+export const portfolioPreviews = [
+  ...projectGroups.map((group) => ({
+    id: `category-${group.id}`,
+    title: group.title,
+    description: group.description,
+    cover: group.cover,
+    previews: group.gallery,
+    detail: `${group.projects.length} projects`,
+    href: `#/categories/${group.id}`,
+  })),
+  ...originalGallerySlugs.map((slug) => {
+    const project = projects.find((item) => item.slug === slug)
+    return {
+      id: `gallery-${slug}`,
+      title: project.title,
+      description: project.description,
+      cover: project.cover,
+      previews: project.collections.flatMap(({ images }) => images),
+      detail: project.type,
+      href: `#/work/${slug}`,
+    }
+  }),
+].map((preview, index) => ({ ...preview, number: number(index + 1) }))

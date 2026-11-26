@@ -1,31 +1,6 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
-import { portfolio, projectGroups, projects } from './content.js'
+import { portfolio, portfolioPreviews as slides } from './content.js'
 import './laptop-hero.css'
-
-const featuredGalleries = ['social-media', 'saudi-national-day', 'saudi-founding-day', 'logofolio']
-const slides = [
-  ...projectGroups.map((group) => ({
-    id: `category-${group.id}`,
-    title: group.title,
-    description: group.description,
-    cover: group.cover,
-    previews: group.gallery,
-    detail: `${group.projects.length} projects`,
-    href: `#/categories/${group.id}`,
-  })),
-  ...featuredGalleries.map((slug) => {
-    const project = projects.find((item) => item.slug === slug)
-    return {
-      id: `gallery-${slug}`,
-      title: project.title,
-      description: project.description,
-      cover: project.cover,
-      previews: project.collections.flatMap(({ images }) => images),
-      detail: project.type,
-      href: `#/work/${slug}`,
-    }
-  }),
-]
 
 export default function LaptopHero() {
   const stage = useRef(null)
@@ -160,7 +135,7 @@ export default function LaptopHero() {
         <div className="studio-case" inert={!isOpen} aria-hidden={!isOpen}>
           <div className="studio-case-copy" aria-live="polite" aria-atomic="true">
             <div className="studio-ticket" key={slide.id}>
-              <p>{String(selected + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</p>
+              <p>{slide.number} / {String(slides.length).padStart(2, '0')}</p>
               <h2>{slide.title}</h2>
               <p>{slide.detail}</p>
             </div>

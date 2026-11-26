@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { portfolio as data, projectGroups, projects } from './content.js'
+import { portfolio as data, portfolioPreviews, projectGroups, projects } from './content.js'
 import LaptopHero from './LaptopHero.jsx'
 
 const Arrow = () => <span aria-hidden="true">↗</span>
@@ -61,26 +61,33 @@ function ArchiveHeading({ label, title, children }) {
 }
 
 function Work({ group }) {
+  const cards = group ? group.projects.map((project) => ({
+    ...project,
+    id: project.slug,
+    href: `#/work/${project.slug}`,
+    detail: `${project.imageCount} ${project.imageCount === 1 ? 'image' : 'images'}`,
+  })) : portfolioPreviews
+
   return (
     <>
       <ArchiveHeading label="Project archive" title={group?.title ?? 'Selected work'} />
       <nav className="archive-categories" aria-label="Project categories">
         <a className="archive-tag" href="#work" aria-current={!group ? 'page' : undefined}>All categories</a>
-        {projectGroups.map((category) => (
-          <a className="archive-tag" key={category.id} href={`#/categories/${category.id}`}
-            aria-current={group?.id === category.id ? 'page' : undefined}>{category.title}</a>
+        {portfolioPreviews.map((preview) => (
+          <a className="archive-tag" key={preview.id} href={preview.href}
+            aria-current={preview.href === `#/categories/${group?.id}` ? 'page' : undefined}>{preview.title}</a>
         ))}
       </nav>
       <div className="archive-grid">
-        {(group?.projects ?? projectGroups).map((project) => (
-          <Reveal as="article" className="archive-catalogue" key={project.slug ?? project.id}>
-            <a href={group ? `#/work/${project.slug}` : `#/categories/${project.id}`}>
+        {cards.map((project) => (
+          <Reveal as="article" className="archive-catalogue" key={project.id}>
+            <a href={project.href}>
               <div className="archive-cover">
                 <img src={project.cover.src} alt="" loading="lazy" />
               </div>
               <div className="archive-ticket">
                 <span className="archive-index">{project.number}</span>
-                <div><h2>{project.title}</h2><p>{group ? `${project.imageCount} images` : `${project.projects.length} projects`}</p></div>
+                <div><h2>{project.title}</h2><p>{project.detail}</p></div>
                 <span className="archive-arrow"><Arrow /></span>
               </div>
             </a>
