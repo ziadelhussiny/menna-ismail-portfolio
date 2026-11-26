@@ -60,6 +60,17 @@ function ArchiveHeading({ label, title, children }) {
   )
 }
 
+function CategoryNav({ activeHash }) {
+  return (
+    <nav className="archive-categories archive-section-nav" aria-label="Project categories">
+      <a className="archive-tag" href="#work" aria-current={activeHash === '#work' ? 'page' : undefined}>All categories</a>
+      {portfolioPreviews.map(({ id, href, title }) => (
+        <a className="archive-tag" key={id} href={href} aria-current={activeHash === href ? 'page' : undefined}>{title}</a>
+      ))}
+    </nav>
+  )
+}
+
 function Work({ group }) {
   const cards = group ? group.projects.map((project) => ({
     ...project,
@@ -71,13 +82,6 @@ function Work({ group }) {
   return (
     <>
       <ArchiveHeading label="Project archive" title={group?.title ?? 'Selected work'} />
-      <nav className="archive-categories" aria-label="Project categories">
-        <a className="archive-tag" href="#work" aria-current={!group ? 'page' : undefined}>All categories</a>
-        {portfolioPreviews.map((preview) => (
-          <a className="archive-tag" key={preview.id} href={preview.href}
-            aria-current={preview.href === `#/categories/${group?.id}` ? 'page' : undefined}>{preview.title}</a>
-        ))}
-      </nav>
       <div className="archive-grid">
         {cards.map((project) => (
           <Reveal as="article" className="archive-catalogue" key={project.id}>
@@ -109,7 +113,7 @@ function ProjectPage({ project }) {
         <ArchiveHeading label={project?.type ?? 'Project archive'} title={project?.title ?? 'Project unavailable'}>
           {project && <p className="archive-description">{project.description}</p>}
         </ArchiveHeading>
-        {project && <div className="archive-ticket case-ticket"><span className="archive-index">{project.number}</span><div><p>{group.title}</p><strong>{project.imageCount} images</strong></div></div>}
+        {project && <div className="archive-ticket case-ticket"><span className="archive-index">{project.number}</span><div><p>{group.title}</p><strong>{project.imageCount} {project.imageCount === 1 ? 'image' : 'images'}</strong></div></div>}
       </div>
       {project && (
         <>
@@ -211,15 +215,17 @@ export default function App() {
 
   useLayoutEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
-    document.getElementById(isStudio ? 'top' : 'archive-title')?.focus({ preventScroll: true })
+    const focusInNav = document.activeElement?.closest('.archive-nav, .archive-section-nav')
+    if (!focusInNav) document.getElementById(isStudio ? 'top' : 'archive-title')?.focus({ preventScroll: true })
   }, [hash, isStudio])
 
   if (isStudio) return <main className="studio-home"><LaptopHero /></main>
 
   return (
-    <main className="studio-archive-page" key={hash}>
+    <main className="studio-archive-page">
       <ArchiveNav active={active} />
-      <div className="archive-body">
+      {active === '#work' && <CategoryNav activeHash={group || isProject ? hash : '#work'} />}
+      <div className="archive-body archive-route" key={hash}>
         {isProject ? <ProjectPage project={project} /> : (
           active === '#about' ? <About /> : active === '#services' ? <Services /> : active === '#contact' ? <Contact /> : <Work group={group} />
         )}

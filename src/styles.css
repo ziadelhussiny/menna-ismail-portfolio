@@ -31,7 +31,7 @@ img { display: block; max-width: 100%; }
   background: radial-gradient(ellipse at 50% 0, var(--studio-green), var(--studio-shadow) 72%);
 }
 
-.archive-nav, .archive-body { max-width: 1240px; margin-inline: auto; }
+.archive-nav, .archive-body, .archive-section-nav { max-width: 1240px; margin-inline: auto; }
 .archive-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 22px; border-bottom: 1px solid var(--line); }
 .archive-nav-links { display: flex; flex-wrap: wrap; gap: 8px; }
 .archive-tag {
@@ -60,6 +60,8 @@ img { display: block; max-width: 100%; }
 .archive-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2.2vw, 28px); }
 .archive-categories { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 24px; }
 .archive-categories button { border: 0; cursor: pointer; }
+.archive-section-nav { margin-block: 0; padding-block: 16px 4px; }
+.archive-section-nav + .archive-body { padding-top: clamp(24px, 3.5vw, 50px); }
 .archive-collection > h2 { margin: 0 0 15px; font: 800 clamp(20px, 3vw, 32px)/1.05 "Inter Tight", var(--sans); }
 .archive-catalogue, .archive-frame, .archive-profile-card {
   margin: 0; padding: 7px; border: 1px solid var(--line); border-radius: 6px;
@@ -121,6 +123,14 @@ img { display: block; max-width: 100%; }
 .reveal { transition: opacity .64s var(--ease), translate .72s var(--ease); }
 .reveal.is-watching:not(.is-visible, :focus-within) { opacity: 0; translate: 0 18px; }
 a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .archive-route { animation: archive-route-in .3s var(--ease) both; }
+  @keyframes archive-route-in {
+    from { opacity: .45; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
 
 @media (max-width: 660px) {
   .archive-nav { align-items: flex-start; padding-block: 14px; }
