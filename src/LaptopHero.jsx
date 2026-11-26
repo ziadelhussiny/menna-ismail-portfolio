@@ -11,6 +11,7 @@ export default function LaptopHero() {
   const [isOpen, setIsOpen] = useState(false)
   const [selected, setSelected] = useState(0)
   const { name, role, portrait, email, location, projects } = portfolio
+  const inquiryLink = `mailto:${email}?subject=${encodeURIComponent('New project inquiry')}`
   const project = projects[selected]
   const alternate = project.gallery.find(({ src }) => src !== project.cover.src)
 
@@ -101,7 +102,7 @@ export default function LaptopHero() {
           <button ref={portfolioButton} type="button" className="studio-tag" onClick={openWork} aria-pressed={isOpen}>Portfolio</button>
           <span className="studio-nav-name" aria-hidden="true">{name}</span>
           <a className="studio-tag" href="#contact">Contact</a>
-          <a className="studio-tag studio-tag-accent" href={`mailto:${email}`}>Discuss a project ↗</a>
+          <a className="studio-tag studio-tag-accent" href={inquiryLink}>Discuss a project ↗</a>
         </header>
 
         <div className="studio-scene" aria-hidden={isOpen}>
