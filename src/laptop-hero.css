@@ -3,6 +3,7 @@ html:has(.studio-home), body:has(.studio-home) { overflow: hidden; overscroll-be
 .laptop-hero { position: relative; height: 100%; touch-action: pinch-zoom; outline: none; }
 .studio-stage {
   --studio-ease: cubic-bezier(.68, 0, .22, 1);
+  --studio-wordmark-size: clamp(60px, 12.9vw, 280px);
   position: relative;
   height: 100%;
   overflow: clip;
@@ -74,7 +75,7 @@ html:has(.studio-home), body:has(.studio-home) { overflow: hidden; overscroll-be
   left: 3%;
   right: 3%;
   margin: 0;
-  font: 900 clamp(60px, 12.9vw, 280px)/.82 "Inter Tight", var(--sans);
+  font: 900 var(--studio-wordmark-size)/.82 "Inter Tight", var(--sans);
   text-transform: uppercase;
   letter-spacing: -.052em;
   white-space: nowrap;
@@ -88,13 +89,13 @@ html:has(.studio-home), body:has(.studio-home) { overflow: hidden; overscroll-be
 .studio-portrait {
   position: absolute;
   z-index: 2;
-  bottom: -10%;
+  top: calc(14% + var(--studio-wordmark-size) * .82 - 22px);
   left: 50%;
   transform: translateX(-50%);
   width: min(58vw, 92vh);
-  height: 92%;
-  object-fit: cover;
-  object-position: center 12%;
+  height: 86%;
+  object-fit: contain;
+  object-position: center top;
 }
 .studio-script {
   position: absolute;
@@ -109,12 +110,13 @@ html:has(.studio-home), body:has(.studio-home) { overflow: hidden; overscroll-be
   text-shadow: 0 3px 18px var(--studio-shadow);
 }
 .studio-id {
+  --studio-strap-length: calc(14svh + var(--studio-wordmark-size) * .82 + 18px);
   position: absolute;
   z-index: 4;
   top: 0;
   right: 8%;
   width: clamp(94px, 13.2vw, 198px);
-  padding-top: clamp(140px, 25vh, 265px);
+  padding-top: var(--studio-strap-length);
   transform: rotate(7deg);
   transform-origin: 50% 0;
 }
@@ -123,7 +125,7 @@ html:has(.studio-home), body:has(.studio-home) { overflow: hidden; overscroll-be
   position: absolute;
   width: 12%;
   top: 0;
-  bottom: calc(47% - 6px);
+  height: calc(var(--studio-strap-length) + 3px);
   left: 44%;
   background: repeating-linear-gradient(90deg, var(--paper) 0 2px, var(--studio-light) 2px 3px);
   box-shadow: 2px 0 6px #0004;
@@ -324,8 +326,8 @@ html:has(.studio-home), body:has(.studio-home) { overflow: hidden; overscroll-be
   .is-dive .studio-nav a { visibility: hidden; }
   .studio-scene h1 { top: 21%; font-size: 13vw; }
   .studio-script { top: 31%; left: 6%; font-size: clamp(33px, 8.8vw, 68px); }
-  .studio-portrait { width: min(108vw, 70vh); height: 69%; bottom: 0; }
-  .studio-id { right: 4%; width: clamp(66px, 18vw, 125px); padding-top: 30vh; }
+  .studio-portrait { width: min(108vw, 70vh); height: 69%; top: 34%; object-fit: cover; object-position: center 12%; }
+  .studio-id { right: 4%; width: clamp(66px, 18vw, 125px); --studio-strap-length: 34svh; }
   .studio-id-card { gap: 4px; }
   .studio-device { --laptop-x: calc(-50% - 22vw); --laptop-y: calc(-50% + 5vh); top: 55%; width: min(91vw, 57vh); }
   .studio-ticket { top: max(72px, 13%); right: auto; left: 50%; translate: -50% 0; width: min(76vw, 295px); padding-block: 11px; transform: rotate(1.8deg); }
@@ -338,7 +340,7 @@ html:has(.studio-home), body:has(.studio-home) { overflow: hidden; overscroll-be
 
 @media (max-width: 820px) and (max-height: 680px) {
   .studio-scene h1 { top: 23%; }
-  .studio-id { padding-top: 33vh; }
+  .studio-id { --studio-strap-length: 36svh; }
   .studio-device { top: 52%; width: min(88vw, 55vh); }
   .studio-case-description { top: 68%; line-height: 1.25; }
   .studio-case-controls { bottom: 8%; }
