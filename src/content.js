@@ -1,5 +1,4 @@
 const publicAsset = (path) => `${import.meta.env.BASE_URL}${path}`
-const artwork = (page, title) => ({ src: publicAsset(`work/page-${page}.webp`), title })
 
 export const portfolio = {
   name: 'Menna Ismail',
@@ -8,7 +7,7 @@ export const portfolio = {
   phone: '+201018383639',
   phoneLabel: '+20 10 1838 3639',
   location: 'Ismailia, Egypt',
-  portrait: publicAsset('menna-portrait.webp'),
+  portrait: publicAsset('menna-portrait-cutout.webp'),
   hero: {
     eyebrow: 'Graphic Designer · Ismailia, Egypt',
     titleTop: 'Menna',
@@ -26,64 +25,87 @@ export const portfolio = {
     education: 'Faculty of Art Education, Suez Canal University',
     graduation: '2023',
   },
-  services: ['Social media design', 'Campaign visuals', 'Logo & visual identity', 'Video editing'],
+  services: ['Social media design', 'Campaign visuals', 'Logo & visual identity', 'Menu design', 'Video editing'],
   tools: ['Photoshop', 'Illustrator', 'After Effects', 'Premiere Pro', 'InDesign'],
-  projects: [
-    {
-      number: '01',
-      slug: 'social-media',
-      title: 'Social Media Visuals',
-      type: 'Client work · Egypt & Saudi Arabia',
-      description: 'Social designs for healthcare, hospitality, food, automotive and other businesses in Egypt and Saudi Arabia.',
-      cover: artwork(14, 'Brisket & Oriental'),
-      gallery: [
-        artwork(5, 'Dr. Fares Aldaghri · Saudi Arabia'),
-        artwork(6, 'Juva · Saudi Arabia'),
-        artwork(7, 'Athar · Egypt and Hawraa Alsaif · Saudi Arabia'),
-        artwork(8, 'Dr. Khaled Sunbol · Saudi Arabia'),
-        artwork(9, 'Dr. Mohamed Shoeib · Saudi Arabia'),
-        artwork(10, 'Qimat Alteb and Tahaluf Alashiqqa · Saudi Arabia'),
-        artwork(11, 'V Care · Saudi Arabia'),
-        artwork(12, 'Marketing campaign · Saudi Arabia'),
-        artwork(13, 'LB Wings and Zakham · Saudi Arabia'),
-        artwork(14, 'Brisket & Oriental · Egypt'),
-        artwork(15, 'Servqual · Egypt'),
-        artwork(16, 'Zadna Factory · Egypt'),
-      ],
-    },
-    {
-      number: '02',
-      slug: 'saudi-national-day',
-      title: 'Saudi National Day',
-      type: 'Campaign visuals',
-      description: 'A collection of four widescreen visuals created for Saudi National Day.',
-      cover: artwork(18, 'Saudi National Day designs'),
-      gallery: [artwork(18, 'Saudi National Day designs')],
-    },
-    {
-      number: '03',
-      slug: 'saudi-founding-day',
-      title: 'Saudi Founding Day',
-      type: 'Campaign visuals',
-      description: 'Six widescreen campaign visuals for Saudi Founding Day.',
-      cover: artwork(20, 'Saudi Founding Day designs'),
-      gallery: [artwork(20, 'Saudi Founding Day designs')],
-    },
-    {
-      number: '04',
-      slug: 'logofolio',
-      title: 'Logofolio',
-      type: 'Logos & visual identity',
-      description: 'Six identities shown across logos, print materials, packaging, signage and digital applications.',
-      cover: artwork(23, 'Identity with a butterfly mark'),
-      gallery: [
-        artwork(22, 'Dental brand identity'),
-        artwork(23, 'Identity with a butterfly mark'),
-        artwork(24, 'Geometric brand identity'),
-        artwork(25, 'Burgerica visual identity'),
-        artwork(26, 'Arabic brand identity'),
-        artwork(27, 'Sakhr industrial identity'),
-      ],
-    },
-  ],
 }
+
+const number = (value) => String(value).padStart(2, '0')
+
+function collection(directory, count, title, label) {
+  return {
+    title,
+    images: Array.from({ length: count }, (_, index) => ({
+      src: publicAsset(`work/${directory}/${number(index + 1)}.webp`),
+      title: `${label} ${number(index + 1)}`,
+    })),
+  }
+}
+
+function project(category, id, title, count, description, extra = []) {
+  const primary = {
+    branding: ['Brand identity', 'Identity presentation', 'Slide'],
+    'social-media': ['Social media', 'Social designs', 'Design'],
+    menu: ['Menu design', 'Menu pages', 'Page'],
+  }[category]
+  const collections = [collection(`${category}/${id}`, count, primary[1], primary[2]), ...extra]
+
+  return {
+    slug: `${category}-${id}`,
+    category,
+    title,
+    type: primary[0],
+    description,
+    cover: collections[0].images[0],
+    collections,
+    imageCount: collections.reduce((total, set) => total + set.images.length, 0),
+  }
+}
+
+export const projectGroups = [
+  {
+    id: 'branding',
+    title: 'Branding',
+    description: 'Visual identities and how they come to life across print and digital.',
+    projects: [
+      project('branding', 'elixir', 'Elixir', 22, 'A visual identity presentation for Elixir.'),
+      project('branding', 'doorz', 'Doorz', 50, 'A brand identity presentation for Doorz.'),
+      project('branding', 'sakhr', 'Sakhr', 10, 'A visual identity presentation for Sakhr.'),
+    ],
+  },
+  {
+    id: 'social-media',
+    title: 'Social Media',
+    description: 'Social posts, campaign visuals, and digital artwork organized by client.',
+    projects: [
+      project('social-media', 'elixir', 'Elixir', 10, 'A set of social designs for Elixir.'),
+      project('social-media', 'happy-hub', 'Happy Hub', 3, 'A set of social designs for Happy Hub.'),
+      project('social-media', 'mossa', 'Mossa', 6, 'A set of social designs for Mossa.'),
+      project('social-media', 'selvo', 'Selvo', 3, 'A set of social designs for Selvo.'),
+      project('social-media', 'sq', 'SQ', 9, 'Social designs and a separate catalogue presentation for SQ.', [
+        collection('social-media/sq/catalogue', 42, 'SQ catalogue', 'Catalogue page'),
+      ]),
+      project('social-media', 'topping-pizza', 'Topping Pizza', 3, 'A set of social designs for Topping Pizza.'),
+      project('social-media', 'west-wood', 'West Wood', 10, 'A set of social designs for West Wood.'),
+    ],
+  },
+  {
+    id: 'menu',
+    title: 'Menu',
+    description: 'Menu design for cafés and restaurants, with each menu shown in page order.',
+    projects: [
+      project('menu', 'mossa', 'Mossa', 3, 'The drinks and food menu for Mossa.'),
+      project('menu', 'doorz', 'Doorz', 5, 'The Doorz menu and a separate two-page print layout.', [
+        collection('menu/doorz/print', 2, 'Print layout', 'Print page'),
+      ]),
+      project('menu', 'topping-pizza', 'Topping Pizza', 3, 'The restaurant menu for Topping Pizza.'),
+    ],
+  },
+].map((group, index) => ({
+  ...group,
+  number: number(index + 1),
+  projects: group.projects.map((item, projectIndex) => ({ ...item, number: number(projectIndex + 1) })),
+  cover: group.projects[0].cover,
+  gallery: group.projects.map(({ cover }) => cover),
+}))
+
+export const projects = projectGroups.flatMap((group) => group.projects)

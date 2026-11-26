@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { portfolio as data } from './content.js'
+import { portfolio as data, projectGroups, projects } from './content.js'
 import LaptopHero from './LaptopHero.jsx'
 
 const Arrow = () => <span aria-hidden="true">↗</span>
@@ -60,20 +60,27 @@ function ArchiveHeading({ label, title, children }) {
   )
 }
 
-function Work() {
+function Work({ group }) {
   return (
     <>
-      <ArchiveHeading label="Menna Ismail" title="Project archive" />
+      <ArchiveHeading label="Project archive" title={group?.title ?? 'Selected work'} />
+      <nav className="archive-categories" aria-label="Project categories">
+        <a className="archive-tag" href="#work" aria-current={!group ? 'page' : undefined}>All categories</a>
+        {projectGroups.map((category) => (
+          <a className="archive-tag" key={category.id} href={`#/categories/${category.id}`}
+            aria-current={group?.id === category.id ? 'page' : undefined}>{category.title}</a>
+        ))}
+      </nav>
       <div className="archive-grid">
-        {data.projects.map((project) => (
-          <Reveal as="article" className="archive-catalogue" key={project.slug}>
-            <a href={`#/work/${project.slug}`}>
+        {(group?.projects ?? projectGroups).map((project) => (
+          <Reveal as="article" className="archive-catalogue" key={project.slug ?? project.id}>
+            <a href={group ? `#/work/${project.slug}` : `#/categories/${project.id}`}>
               <div className="archive-cover">
                 <img src={project.cover.src} alt="" loading="lazy" />
               </div>
               <div className="archive-ticket">
                 <span className="archive-index">{project.number}</span>
-                <div><h2>{project.title}</h2><p>{project.type}</p></div>
+                <div><h2>{project.title}</h2><p>{group ? `${project.imageCount} images` : `${project.projects.length} projects`}</p></div>
                 <span className="archive-arrow"><Arrow /></span>
               </div>
             </a>
@@ -85,27 +92,43 @@ function Work() {
 }
 
 function ProjectPage({ project }) {
-  const nextProject = project && data.projects[(data.projects.indexOf(project) + 1) % data.projects.length]
+  const [collectionIndex, setCollectionIndex] = useState(0)
+  const group = projectGroups.find(({ id }) => id === project?.category)
+  const nextProject = group && group.projects[(group.projects.indexOf(project) + 1) % group.projects.length]
+  const collection = project?.collections[collectionIndex]
   return (
     <>
       <div className="archive-case-intro">
         <ArchiveHeading label={project?.type ?? 'Project archive'} title={project?.title ?? 'Project unavailable'}>
           {project && <p className="archive-description">{project.description}</p>}
         </ArchiveHeading>
-        {project && <div className="archive-ticket case-ticket"><span className="archive-index">{project.number}</span><div><p>Project files</p><strong>{project.gallery.length} {project.gallery.length === 1 ? 'image' : 'images'}</strong></div></div>}
+        {project && <div className="archive-ticket case-ticket"><span className="archive-index">{project.number}</span><div><p>{group.title}</p><strong>{project.imageCount} images</strong></div></div>}
       </div>
       {project && (
         <>
-          <div className="archive-grid archive-frames">
-            {project.gallery.map(({ src, title }, index) => (
-              <Reveal as="figure" className="archive-frame" key={src}>
-                <div className="archive-cover"><img src={src} alt={`Design work for ${title}`} loading={index === 0 ? 'eager' : 'lazy'} /></div>
-                <figcaption><span>{String(index + 1).padStart(2, '0')}</span>{title}</figcaption>
-              </Reveal>
-            ))}
-          </div>
+          {project.collections.length > 1 && (
+            <div className="archive-categories" aria-label="Project collections">
+              {project.collections.map(({ title }, index) => (
+                <button className="archive-tag" type="button" key={title}
+                  aria-pressed={collectionIndex === index} onClick={() => setCollectionIndex(index)}>{title}</button>
+              ))}
+            </div>
+          )}
+            <section className="archive-collection" aria-labelledby="collection-title" key={collection.title}>
+              <h2 id="collection-title">{collection.title}</h2>
+              <div className={`archive-grid archive-frames archive-frames-${group.id}`}>
+                {collection.images.map(({ src, title: caption }, index) => (
+                  <Reveal as="figure" className="archive-frame" key={src}>
+                    <a className="archive-cover" href={src} target="_blank" rel="noreferrer" aria-label={`Open ${caption} at full size`}>
+                      <img src={src} alt={`${project.title} · ${caption}`} loading={index < 2 ? 'eager' : 'lazy'} />
+                    </a>
+                    <figcaption>{caption}</figcaption>
+                  </Reveal>
+                ))}
+              </div>
+            </section>
           <div className="archive-case-actions">
-            <a className="archive-tag" href="#work">← All projects</a>
+            <a className="archive-tag" href={`#/categories/${group.id}`}>← {group.title}</a>
             <a className="archive-tag" href={`#/work/${nextProject.slug}`}>Next · {nextProject.title} <Arrow /></a>
           </div>
         </>
@@ -167,9 +190,11 @@ function Contact() {
 
 export default function App() {
   const [hash, setHash] = useState(() => window.location.hash)
-  const isProject = hash.startsWith('#/work/')
+  const legacyGroup = { '#/work/social-media': 'social-media', '#/work/logofolio': 'branding' }[hash]
+  const group = projectGroups.find(({ id }) => hash === `#/categories/${id}` || id === legacyGroup)
+  const isProject = hash.startsWith('#/work/') && !group
   const isStudio = !hash || hash === '#top'
-  const project = isProject ? data.projects.find(({ slug }) => hash === `#/work/${slug}`) : null
+  const project = isProject ? projects.find(({ slug }) => hash === `#/work/${slug}`) : null
   const active = archiveLinks.some(([href]) => href === hash) ? hash : '#work'
 
   useEffect(() => {
@@ -190,7 +215,7 @@ export default function App() {
       <ArchiveNav active={active} />
       <div className="archive-body">
         {isProject ? <ProjectPage project={project} /> : (
-          active === '#about' ? <About /> : active === '#services' ? <Services /> : active === '#contact' ? <Contact /> : <Work />
+          active === '#about' ? <About /> : active === '#services' ? <Services /> : active === '#contact' ? <Contact /> : <Work group={group} />
         )}
       </div>
     </main>

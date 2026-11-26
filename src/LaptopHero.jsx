@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
-import { portfolio } from './content.js'
+import { portfolio, projectGroups } from './content.js'
 import './laptop-hero.css'
 
 export default function LaptopHero() {
@@ -10,7 +10,8 @@ export default function LaptopHero() {
   const gesture = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
   const [selected, setSelected] = useState(0)
-  const { name, role, portrait, email, location, projects } = portfolio
+  const { name, role, portrait, email, location } = portfolio
+  const projects = projectGroups
   const inquiryLink = `mailto:${email}?subject=${encodeURIComponent('New project inquiry')}`
   const project = projects[selected]
   const alternate = project.gallery.find(({ src }) => src !== project.cover.src)
@@ -119,14 +120,14 @@ export default function LaptopHero() {
         </div>
 
         <button type="button" className="studio-device" onClick={isOpen ? () => moveProject(1) : openWork}
-          aria-label={isOpen ? 'Show next project' : 'Zoom into the laptop and explore portfolio'}>
+          aria-label={isOpen ? 'Show next category' : 'Zoom into the laptop and explore portfolio'}>
           <span className="studio-lid">
             <span className="studio-screen">
-              <span className="studio-screen-reel" key={project.slug}>
+              <span className="studio-screen-reel" key={project.id}>
                 <img src={project.cover.src} alt="" />
                 {isOpen && alternate && <img className="studio-screen-alternate" src={alternate.src} alt="" />}
               </span>
-              {isOpen && <span className="studio-screen-flash" key={`flash-${project.slug}`} aria-hidden="true" />}
+              {isOpen && <span className="studio-screen-flash" key={`flash-${project.id}`} aria-hidden="true" />}
             </span>
           </span>
           <span className="studio-base" aria-hidden="true" />
@@ -134,17 +135,17 @@ export default function LaptopHero() {
 
         <div className="studio-case" inert={!isOpen} aria-hidden={!isOpen}>
           <div className="studio-case-copy" aria-live="polite" aria-atomic="true">
-            <div className="studio-ticket" key={project.slug}>
+            <div className="studio-ticket" key={project.id}>
               <p>{String(selected + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}</p>
               <h2>{project.title}</h2>
-              <p>{project.type}</p>
+              <p>{project.projects.length} projects</p>
             </div>
             <p className="studio-case-description" key={project.description}>{project.description}</p>
           </div>
           <div className="studio-case-controls">
-            <button type="button" onClick={() => moveProject(-1)} aria-label="Previous project">←</button>
-            <a href={`#/work/${project.slug}`}>View gallery ↗</a>
-            <button type="button" onClick={() => moveProject(1)} aria-label="Next project">→</button>
+            <button type="button" onClick={() => moveProject(-1)} aria-label="Previous category">←</button>
+            <a href={`#/categories/${project.id}`}>View gallery ↗</a>
+            <button type="button" onClick={() => moveProject(1)} aria-label="Next category">→</button>
           </div>
         </div>
 
