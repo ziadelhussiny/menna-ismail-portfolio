@@ -1,6 +1,31 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
-import { portfolio, projectGroups } from './content.js'
+import { portfolio, projectGroups, projects } from './content.js'
 import './laptop-hero.css'
+
+const featuredGalleries = ['social-media', 'saudi-national-day', 'saudi-founding-day', 'logofolio']
+const slides = [
+  ...projectGroups.map((group) => ({
+    id: `category-${group.id}`,
+    title: group.title,
+    description: group.description,
+    cover: group.cover,
+    previews: group.gallery,
+    detail: `${group.projects.length} projects`,
+    href: `#/categories/${group.id}`,
+  })),
+  ...featuredGalleries.map((slug) => {
+    const project = projects.find((item) => item.slug === slug)
+    return {
+      id: `gallery-${slug}`,
+      title: project.title,
+      description: project.description,
+      cover: project.cover,
+      previews: project.collections.flatMap(({ images }) => images),
+      detail: project.type,
+      href: `#/work/${slug}`,
+    }
+  }),
+]
 
 export default function LaptopHero() {
   const stage = useRef(null)
@@ -11,10 +36,9 @@ export default function LaptopHero() {
   const [isOpen, setIsOpen] = useState(false)
   const [selected, setSelected] = useState(0)
   const { name, role, portrait, email, location } = portfolio
-  const projects = projectGroups
   const inquiryLink = `mailto:${email}?subject=${encodeURIComponent('New project inquiry')}`
-  const project = projects[selected]
-  const alternate = project.gallery.find(({ src }) => src !== project.cover.src)
+  const slide = slides[selected]
+  const alternate = slide.previews.find(({ src }) => src !== slide.cover.src)
 
   function openWork() {
     if (isOpen) return
@@ -29,12 +53,12 @@ export default function LaptopHero() {
     nextInput.current = performance.now() + 850
   }
 
-  function moveProject(step) {
+  function moveSlide(step) {
     if (step < 0 && selected === 0) {
       showStudio()
       return
     }
-    setSelected((index) => (index + step + projects.length) % projects.length)
+    setSelected((index) => (index + step + slides.length) % slides.length)
   }
 
   function navigate(step) {
@@ -42,7 +66,7 @@ export default function LaptopHero() {
       if (step > 0) openWork()
       return
     }
-    moveProject(step)
+    moveSlide(step)
   }
 
   const wheelNavigate = useEffectEvent((event) => {
@@ -119,15 +143,15 @@ export default function LaptopHero() {
           </div>
         </div>
 
-        <button type="button" className="studio-device" onClick={isOpen ? () => moveProject(1) : openWork}
-          aria-label={isOpen ? 'Show next category' : 'Zoom into the laptop and explore portfolio'}>
+        <button type="button" className="studio-device" onClick={isOpen ? () => moveSlide(1) : openWork}
+          aria-label={isOpen ? 'Show next preview' : 'Zoom into the laptop and explore portfolio'}>
           <span className="studio-lid">
             <span className="studio-screen">
-              <span className="studio-screen-reel" key={project.id}>
-                <img src={project.cover.src} alt="" />
+              <span className="studio-screen-reel" key={slide.id}>
+                <img src={slide.cover.src} alt="" />
                 {isOpen && alternate && <img className="studio-screen-alternate" src={alternate.src} alt="" />}
               </span>
-              {isOpen && <span className="studio-screen-flash" key={`flash-${project.id}`} aria-hidden="true" />}
+              {isOpen && <span className="studio-screen-flash" key={`flash-${slide.id}`} aria-hidden="true" />}
             </span>
           </span>
           <span className="studio-base" aria-hidden="true" />
@@ -135,17 +159,17 @@ export default function LaptopHero() {
 
         <div className="studio-case" inert={!isOpen} aria-hidden={!isOpen}>
           <div className="studio-case-copy" aria-live="polite" aria-atomic="true">
-            <div className="studio-ticket" key={project.id}>
-              <p>{String(selected + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}</p>
-              <h2>{project.title}</h2>
-              <p>{project.projects.length} projects</p>
+            <div className="studio-ticket" key={slide.id}>
+              <p>{String(selected + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</p>
+              <h2>{slide.title}</h2>
+              <p>{slide.detail}</p>
             </div>
-            <p className="studio-case-description" key={project.description}>{project.description}</p>
+            <p className="studio-case-description" key={`description-${slide.id}`}>{slide.description}</p>
           </div>
           <div className="studio-case-controls">
-            <button type="button" onClick={() => moveProject(-1)} aria-label="Previous category">←</button>
-            <a href={`#/categories/${project.id}`}>View gallery ↗</a>
-            <button type="button" onClick={() => moveProject(1)} aria-label="Next category">→</button>
+            <button type="button" onClick={() => moveSlide(-1)} aria-label="Previous preview">←</button>
+            <a href={slide.href}>View gallery ↗</a>
+            <button type="button" onClick={() => moveSlide(1)} aria-label="Next preview">→</button>
           </div>
         </div>
 
